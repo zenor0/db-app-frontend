@@ -17,20 +17,24 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="商品名"
-        prop="name">
+        label="类别"
+        prop="game">
+      </el-table-column>
+      <el-table-column
+        label="标题"
+        prop="title">
+      </el-table-column>
+      <el-table-column
+        label="详情信息"
+        prop="detail">
       </el-table-column>
       <el-table-column
         label="价格"
         prop="price">
       </el-table-column>
       <el-table-column
-        label="新旧程度"
-        prop="goodsLevel">
-      </el-table-column>
-      <el-table-column
-        label="热度"
-        prop="hot">
+        label="发布时间"
+        prop="publish_time">
       </el-table-column>
       <el-table-column
         align="right">
@@ -130,19 +134,20 @@
       mounted() {
         //加载数据
         let jsonObj = {};
-        jsonObj.userId = window.sessionStorage.getItem("userId");
+        let userId = window.sessionStorage.getItem("userId");
         let jsonMsg = JSON.stringify(jsonObj);
         let self = this;
         //加载文字数据
-        $.get("http://localhost:8083/goods/getMyGoods.do",jsonObj,function (data) {
-          self.tableData = data;
+        $.get("http://localhost:8080/api/users/" + userId + "/goods",jsonObj,function (data) {
+          self.tableData = data.data.goods;
           //为每个表格元素加载图片数据，主图
           $(self.tableData).each(function (index,element) {
             let jsonObj = {};
             jsonObj.goodsId = element.goodsId;
-            $.get("http://localhost:8083/goods/getGoodsMainImg.do",jsonObj,function (data) {
+            let requestUrl = "http://localhost:8080/api/goods/" + element.uid + "/img";
+            $.get(requestUrl,jsonObj,function (data) {
               //本地映射到9090端口，部署到远程服务器需要修改这里，服务端返回的imgUrl应该为相对路径，这里图片名字就行
-              element.picture = "http://localhost:9090/" + data.imgUrl;
+              element.picture = data.data.img;
               //因为数组单值更新不会引起 Vue 重新渲染，手动通知 Vue 渲染
               self.$set(self.tableData,index,element);
             },"json");

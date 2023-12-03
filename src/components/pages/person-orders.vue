@@ -16,21 +16,21 @@
             <img :src="scope.row.picture" alt="加载中..." width="80" height="80">
           </template>
         </el-table-column>
+
+        <el-table-column label="货物ID" prop="good_id"> </el-table-column>
         <el-table-column
-          label="商品名"
-          prop="name">
-        </el-table-column>
-        <el-table-column
-          label="价格"
-          prop="price">
-        </el-table-column>
-        <el-table-column
-          label="购买时间"
-          prop="time">
-        </el-table-column>
+        label="价格"
+        prop="price">
+      </el-table-column>
+      <el-table-column
+      label="购买时间"
+      prop="create_time">
+    </el-table-column>
+    <el-table-column label="付款时间" prop="pay_time"> </el-table-column>
+    <el-table-column label="货物ID" prop="good_id"> </el-table-column>
         <el-table-column
           label="订单状态"
-          prop="ordersStatusText">
+          prop="state">
         </el-table-column>
         <el-table-column
           align="right">
@@ -136,16 +136,18 @@
       mounted() {
         //加载数据
         let jsonObj = {};
-        jsonObj.userId = window.sessionStorage.getItem("userId");
+        let userId = window.sessionStorage.getItem("userId");
         let jsonMsg = JSON.stringify(jsonObj);
         let self = this;
         //加载文字数据
-        $.get("http://localhost:8083/orders/getOrdersAllByUserId.do",jsonObj,function (data) {
-          self.tableData = data;
+        $.get("http://localhost:8080/api/users/" + userId + "/orders",jsonObj,function (data) {
+          self.tableData = data.data.orders;
           //更改前端显示文字
           $(self.tableData).each(function (index,element) {
             let jsonObj = {};
             jsonObj.goodsId = element.goodsId;
+
+
             if(element.ordersStatus === 1){
               element.ordersStatusText = "已完成";
             }else if(element.ordersStatus === 0){
@@ -154,15 +156,10 @@
               element.ordersStatusText = "有异议";
             }
 
-            // if (element.adminStatus === 1){
-            //   element.adminStatusText = "已处理";
-            // }else{
-            //   element.adminStatusText = "未处理或无反馈";
-            // }
-            //为每个表格元素加载图片数据，主图
-            $.get("http://localhost:8083/goods/getGoodsMainImg.do",jsonObj,function (data) {
+            let requestUrl = "http://localhost:8080/api/goods/" + element.uid + "/img";
+            $.get(requestUrl,jsonObj,function (data) {
               //本地映射到9090端口，部署到远程服务器需要修改这里，服务端返回的imgUrl应该为相对路径，这里图片名字就行
-              element.picture = "http://localhost:9090/" + data.imgUrl;
+              element.picture = data.data.img;
               //因为数组单值更新不会引起 Vue 重新渲染，手动通知 Vue 渲染
               self.$set(self.tableData,index,element);
             },"json");

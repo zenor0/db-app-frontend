@@ -22,11 +22,9 @@
               </el-form-item>
             </el-col>
             <el-col :span="9" :offset="1">
-              <el-form-item label="性别">
-                <el-select v-model="formLabelAlign.sex" placeholder="还没有性别" style="width: 100%;">
-                  <el-option label="男" :value=1></el-option>
-                  <el-option label="女" :value=2></el-option>
-                </el-select>
+              <el-form-item label="真实姓名">
+                <el-input v-model="formLabelAlign.realname" disabled></el-input>
+              </el-form-item>
               </el-form-item>
             </el-col>
           </el-row>
@@ -37,7 +35,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="9" :offset="1">
-              <el-form-item label="账户验证状态">
+              <el-form-item label="账户封禁状态">
                 <el-input v-model="formLabelAlign.status" disabled></el-input>
               </el-form-item>
             </el-col>
@@ -104,19 +102,15 @@
       mounted() {
       //  使用生命周期和ajax加载数据
         let jsonObj = new Object();
-        jsonObj.userId = window.sessionStorage.getItem("userId");
+        let userId = window.sessionStorage.getItem("userId");
         let jsonMsg = JSON.stringify(jsonObj);
         let self = this;
-        $.get("http://localhost:8083/user/getInfo.do",jsonObj,function (data) {
-          self.formLabelAlign.username = data.username;
-          if(data.sex === 1)
-            self.formLabelAlign.sex = "男";
-          else
-            self.formLabelAlign.sex = "女";
-          self.formLabelAlign.name = data.name;
-          self.formLabelAlign.password = data.password;
-          self.formLabelAlign.status = "已启用";
-          self.formLabelAlign.email = data.email;
+        $.get("http://localhost:8080/api/users/" + userId,jsonObj,function (data) {
+          self.formLabelAlign.username = data.data.username;
+          self.formLabelAlign.realname = data.data.realname;
+          self.formLabelAlign.name = data.data.nickname;
+          self.formLabelAlign.status = data.data.blocked == false ? "正常" : "封禁";
+          self.formLabelAlign.email = data.data.email;
         },"json");
       },
       methods:{

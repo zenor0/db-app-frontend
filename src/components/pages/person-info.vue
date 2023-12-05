@@ -74,21 +74,22 @@
           } else {
             //6到30位数字、字母、特殊符号
             let passwordRex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[~!@#$%^&*()_+`\-={}:";'<>?,.\/]).{6,30}$/;
-            if (!passwordRex.test(this.formLabelAlign.password)) {
-              callback(new Error('6到30位包含数字、字母、特殊符号'));
-            }
+            // if (!passwordRex.test(this.formLabelAlign.password)) {
+            //   callback(new Error('6到30位包含数字、字母、特殊符号'));
+            // }
             callback();
           }
         };
         return{
           formLabelAlign: {
             username: '',
-            password: '',
-            name: '',
-            sex: 1,
             email: '',
-            status: '',
+            name: '',
+            password: '',
+            realname: '',
             userId:'',
+            status: '',
+            id_number:''
           },
           rules:{
             password: [
@@ -111,6 +112,10 @@
           self.formLabelAlign.name = data.data.nickname;
           self.formLabelAlign.status = data.data.blocked == false ? "正常" : "封禁";
           self.formLabelAlign.email = data.data.email;
+          self.formLabelAlign.nickname = data.data.nickname;
+          self.formLabelAlign.id_number = data.data.id_number;
+          self.formLabelAlign.blocked = data.data.blocked;
+
         },"json");
       },
       methods:{
@@ -125,8 +130,8 @@
               this.formLabelAlign.userId = window.sessionStorage.getItem("userId");
               let jsonMsg = JSON.stringify(this.formLabelAlign);
               let self = this;
-              $.post("http://localhost:8083/user/setInfo.do",jsonMsg,function (data) {
-                if(data.code === 1){
+              $.post("http://localhost:8080/api/users/"+this.formLabelAlign.userId+"/update",jsonMsg,function (data) {
+                if(data.code === 200){
                   self.dialogValue = "保存成功";
                 }else{
                   self.dialogValue = "保存失败，错误码：" + data.code;

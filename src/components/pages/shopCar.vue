@@ -25,7 +25,7 @@
           </el-table-column>
           <el-table-column
             label="商品ID"
-            prop="goodsId">
+            prop="goods_id">
           </el-table-column>
           <el-table-column
             align="right">
@@ -126,22 +126,22 @@
         let jsonMsg = JSON.stringify(jsonObj);
         let self = this;
         //加载文字数据
-        $.get("http://localhost:8083/shopCar/findAllByUid.do",jsonObj,function (data) {
-          self.tableData = data;
+        $.get("http://localhost:8080/api/carts/"+jsonObj.userId,jsonObj,function (data) {
+          self.tableData = data.data.carts;
           //加载商品主图
           $(self.tableData).each(function (index,element) {
             let jsonObj = {};
             jsonObj.goodsId = element.goodsId;
-            $.get("http://localhost:8083/goods/getGoodsMainImg.do",jsonObj,function (data) {
+            $.get("http://localhost:8080/api/goods/"+element.goods_id+"/img",jsonObj,function (data) {
               //本地映射到9090端口，部署到远程服务器需要修改这里，服务端返回的imgUrl应该为相对路径，这里图片名字就行
-              element.picture = "http://localhost:9090/" + data.imgUrl;
+              element.picture = data.data.img
               //因为数组单值更新不会引起 Vue 重新渲染，手动通知 Vue 渲染
               self.$set(self.tableData,index,element);
             },"json");
             //取得商品其他信息
-            $.get("http://localhost:8083/goods/getGoodsById.do",jsonObj,function (data) {
-              element.name = data.name;
-              element.price = data.price;
+            $.get("http://localhost:8080/api/goods/"+element.goods_id+"/onegoodinfo",jsonObj,function (data) {
+              element.name = data.data.title;
+              element.price = data.data.price;
               //引起 Vue 重新渲染
               self.$set(self.tableData,index,element);
             },"json");
@@ -162,12 +162,12 @@
           //点击了删除按钮
           // console.log(index, row);
           let jsonObj = {};
-          jsonObj.goodsId = row.goodsId;
+          jsonObj.goodsId = row.goods_id;
           jsonObj.userId = window.sessionStorage.getItem("userId");
           let jsonMsg = JSON.stringify(jsonObj);
           let self = this;
-          $.post("http://localhost:8083/shopCar/deleteOneByUidAndGid.do", jsonMsg, function (data) {
-            if (data.code === 1) {
+          $.post("http://localhost:8080/api/carts/"+jsonObj.userId+"/"+jsonObj.goodsId+"/delete", jsonMsg, function (data) {
+            if (data.code === 200) {
               self.dialogValue = "删除成功";
               self.initShopCar();
             } else {
@@ -181,14 +181,14 @@
           // console.log(index, row);
           this.dialogValue2 = "总价为：" + row.price + "\r\n请扫码支付";
           this.centerDialogVisible2 = true;
-
+          
           let self = this;
-
+          
           let jsonObj = {};
           jsonObj.goodsId = row.goodsId;
           jsonObj.userId = window.sessionStorage.getItem("userId");
           let jsonMsg = JSON.stringify(jsonObj);
-
+          
           $.post("http://localhost:8083/shopCar/deleteOneByUidAndGid.do",jsonMsg,function (data) {
             //这里的代码因为只是模拟，实际上存在逻辑错误
             if(data.code === 1){
@@ -219,6 +219,7 @@
         },
         clickButton() {
           this.centerDialogVisible = false;
+          window.location.reload();
         },
         buyAll() {
           let price = 0;

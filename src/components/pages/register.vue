@@ -24,7 +24,7 @@
         </el-input>
       </div>
       <div style="text-align: center;margin-left: 10px;margin-top: 50px;">
-        <el-button type="primary" style="min-width: 80%;" @click="login()" :disabled="registerButton">注册</el-button>
+        <el-button type="primary" style="min-width: 80%;" @click="login()" >注册</el-button>
       </div>
       <el-row type="flex" class="row-bg" justify="center" style="top: 10px;">
         <el-col :span="24">
@@ -78,7 +78,7 @@
         let jsonObj = {};
         jsonObj.username = this.inputUsername;
         jsonObj.email = this.inputEmail;
-        jsonObj.name = this.inputName;
+        jsonObj.nickname = this.inputName;
         jsonObj.password = this.inputPassword;
         let jsonMsg = JSON.stringify(jsonObj);
         let self = this;
@@ -94,7 +94,7 @@
         // }, "json");
         $.ajax({
           type:"POST",
-          url:"http://localhost:8083/user/register.do",
+          url:"http://localhost:8080/api/users/",
           data:jsonMsg,
           dataType:"json",
           contentType:"application/json",

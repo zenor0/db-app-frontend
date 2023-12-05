@@ -125,6 +125,11 @@
             goodsId:"",
             name:"",
             dscrip:"",
+            state:"",
+            game:"",
+            price:"",
+            publish_time:"",
+            seller_id:""
           },
           centerDialogVisible: false,
           centerDialogVisible2: false,
@@ -166,57 +171,68 @@
         },
         handleEdit(index, row) {
           //点击了商品介绍按钮
-          // console.log(index, row);
           let jsonObj = {};
-          jsonObj.goodsId = row.goodsId;
+          jsonObj.goodsId = row.uid;
           let jsonMsg = JSON.stringify(jsonObj);
           let self = this;
-          $.get("http://localhost:8083/goods/getGoodsDscrip.do",jsonObj,function (data) {
+          $.get("http://localhost:8080/api/goods/"+row.uid+"/onegoodinfo",jsonObj,function (data) {
             if(data !== "" || data !== null) {
-              self.goodsForm.goodsId = data.goodsId;
-              self.goodsForm.name = data.name;
-              self.goodsForm.dscrip = data.dscrip;
+              self.goodsForm.goodsId = data.data.uid;
+              self.goodsForm.name = data.data.title;
+              self.goodsForm.dscrip = data.data.detail;
+              self.goodsForm.seller_id = data.data.seller_id;
+              self.goodsForm.state = data.data.state;
+              self.goodsForm.game = data.data.game;
+              self.goodsForm.price = data.data.price;
+              self.goodsForm.publish_time = data.data.publish_time;
               self.centerDialogVisible = true;
             }
           },"json");
+
         },
         handleEdit2(index, row) {
           //点击了取消出售按钮
           // console.log(index, row);
           let jsonObj = {};
-          jsonObj.goodsId = row.goodsId;
+          jsonObj.goodsId = row.uid;
           let jsonMsg = JSON.stringify(jsonObj);
           let self = this;
-          $.post("http://localhost:8083/goods/deleteMyGoodsAndUrls.do",jsonMsg,function (data) {
-            if(data.code === 1){
+          $.get("http://localhost:8080/api/goods/"+jsonObj.goodsId+"/delete",jsonMsg,function (data) {
+            if(data.code === 200){
               self.dialogValue = "删除成功";
             }else{
               self.dialogValue = "删除失败，错误码：" + data.code;
             }
             self.centerDialogVisible2 = true;
           },"json");
-          window.location.reload();
+          // window.location.reload();
         },
-        submitDscrip(){
+        submitDscrip(index, row){
           //点击了保存按钮
           let jsonObj = {};
-          jsonObj.goodsId = this.goodsForm.goodsId;
-          jsonObj.dscrip = this.goodsForm.dscrip;
+          jsonObj.uid = this.goodsForm.goodsId;
+          jsonObj.detail = this.goodsForm.dscrip;
+          jsonObj.seller_id = this.goodsForm.seller_id;
+          jsonObj.state = this.goodsForm.state;
+          jsonObj.game = this.goodsForm.game;
+          jsonObj.title = this.goodsForm.name;
+          jsonObj.price = this.goodsForm.price;
+          jsonObj.publish_time = this.goodsForm.publish_time;
           let jsonMsg = JSON.stringify(jsonObj);
           let self = this;
-          $.post("http://localhost:8083/goods/saveGoodsDscrip.do",jsonMsg,function (data) {
-            if(data.code === 1){
+          $.post("http://localhost:8080/api/goods/"+this.goodsForm.goodsId+"/update",jsonMsg,function (data) {
+            if(data.code === 200){
               self.dialogValue = "保存成功";
             }else{
               self.dialogValue = "保存失败，错误码：" + data.code;
             }
             self.centerDialogVisible2 = true;
           },"json");
-          window.location.reload();
         },
         clickButton(){
           this.centerDialogVisible2 = false;
           this.centerDialogVisible = false;
+          window.location.reload()
         }
       }
     }

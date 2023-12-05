@@ -117,7 +117,7 @@
           centerDialogVisible: false,
           centerDialogVisible2: false,
           feedbackForm: {
-            ordersId: "",
+            order_id: "",
             feedbacksStatus: -1,
             value: "",
             userId:"",
@@ -176,23 +176,23 @@
         handleEdit(index, row) {
           //点击了反馈按钮
           // console.log(index, row);
-          this.feedbackForm.ordersId = row.ordersId;
           this.centerDialogVisible = true;
-          this.feedbackForm.feedbacksStatus = -1;
-          this.feedbackForm.value = "";
+          // this.feedbackForm.feedbacksStatus = -1;
+          this.feedbackForm.reason = row.value;
           this.feedbackForm.userId = window.sessionStorage.getItem("userId");
+          this.feedbackForm.ordersId = row.uid;
           this.feedbackForm.name = row.name;
-          this.feedbackForm.feedbacksTime = new Date().toLocaleString();
+          // this.feedbackForm.feedbacksTime = new Date().toLocaleString();
           //模拟支付
-          this.feedbackForm.payId = row.goodsId;
-          this.feedbackForm.goodsId = row.goodsId;
+          // this.feedbackForm.payId = row.to_id;
+          this.feedbackForm.goodsId = row.good_id;
         },
         submitFeedback(){
           // console.log("点击了提交反馈");
           let self = this;
           let jsonMsg = JSON.stringify(this.feedbackForm);
-          $.post("http://localhost:8083/feedback/submitFeedback.do",jsonMsg,function (data) {
-            if(data.code === 1){
+          $.post("http://localhost:8080/api/issues/" + this.feedbackForm.userId, jsonMsg, function (data) {
+            if(data.code === 200){
               self.dialogValue = "提交成功";
             }else{
               self.dialogValue = "提交失败，错误码" + data.code;

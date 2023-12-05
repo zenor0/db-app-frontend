@@ -55,9 +55,9 @@
             <el-card :body-style="{ padding: '0px', textAlign: 'center' }">
               <img :src="obj2.picture" class="image" style="width: 100%" alt="请检查网络连接">
               <div style="padding: 10px;">
-                <h4>{{ obj2.name }}</h4>
+                <h4>{{ obj2.title }}</h4>
                 <div class="bottom clearfix">
-                  <el-button type="text" class="button" @click="clickGoodsInfoButton(obj2.goodsId)">查看详情</el-button>
+                  <el-button type="text" class="button" @click="clickGoodsInfoButton(obj2.uid)">查看详情</el-button>
                 </div>
               </div>
             </el-card>
@@ -72,9 +72,9 @@
             <el-card :body-style="{ padding: '0px', textAlign: 'center' }">
               <img :src="obj2.picture" class="image" style="width: 100%" alt="请检查网络连接">
               <div style="padding: 10px;">
-                <h4>{{ obj2.name }}</h4>
+                <h4>{{ obj2.title }}</h4>
                 <div class="bottom clearfix">
-                  <el-button type="text" class="button" @click="clickGoodsInfoButton(obj2.goodsId)">查看详情</el-button>
+                  <el-button type="text" class="button" @click="clickGoodsInfoButton(obj2.uid)">查看详情</el-button>
                 </div>
               </div>
             </el-card>
@@ -178,12 +178,11 @@ export default {
       self.fullscreenLoading = false;
     }, 300);
 
-    $.get("http://localhost:8080/api/goods", function (data) {
+    $.get("http://localhost:8080/api/goods/goodslist", function (data) {
     // $.get("http://localhost:8083/goods/getIndexGoods.do/1", function (data) {
       self.data1 = data.data.goods;
       $(self.data1).each(function (index, element) {
         let jsonObj = {};
-        console.log(element);
         let requestUrl = "http://localhost:8080/api/goods/" + element.uid + "/img";
         //为每个表格元素加载图片数据，主图
         $.get(requestUrl, jsonObj, function (data) {
@@ -194,32 +193,31 @@ export default {
     }, "json");
 
     //加载低价好物数据，服务端返回最多 12条 数据
-    $.get("http://localhost:8083/goods/getIndexGoods.do/2", function (data) {
-      self.data2 = data;
+    $.get("http://localhost:8080/api/goods/goodslist", function (data) {
+      self.data2 = data.data.goods;
       $(self.data2).each(function (index, element) {
         let jsonObj = {};
-        jsonObj.goodsId = element.goodsId;
         //为每个表格元素加载图片数据，主图
-        $.get("http://localhost:8083/goods/getGoodsMainImg.do", jsonObj, function (data) {
-          //本地映射到9090端口，部署到远程服务器需要修改这里，服务端返回的imgUrl应该为相对路径，这里图片名字就行
-          element.picture = "http://localhost:9090/" + data.imgUrl;
-          //因为数组单值更新不会引起 Vue 重新渲染，手动通知 Vue 渲染
+        let requestUrl = "http://localhost:8080/api/goods/" + element.uid + "/img";
+        //为每个表格元素加载图片数据，主图
+        $.get(requestUrl, jsonObj, function (data) {
+          element.picture = data.data.img;
           self.$set(self.data2, index, element);
         }, "json");
       });
     }, "json");
 
     //加载 9 新以上数据，服务端返回最多 12条 数据
-    $.get("http://localhost:8083/goods/getIndexGoods.do/3", function (data) {
-      self.data3 = data;
+    $.get("http://localhost:8080/api/goods/goodslist", function (data) {
+      self.data3 = data.data.goods;
       $(self.data3).each(function (index, element) {
         let jsonObj = {};
-        jsonObj.goodsId = element.goodsId;
         //为每个表格元素加载图片数据，主图
+        let requestUrl2 = "http://localhost:8080/api/goods/" + element.uid +"/img";
         element.picture = "";
-        $.get("http://localhost:8083/goods/getGoodsMainImg.do", jsonObj, function (data) {
+        $.get(requestUrl2, jsonObj, function (data) {
           //本地映射到9090端口，部署到远程服务器需要修改这里，服务端返回的imgUrl应该为相对路径，这里图片名字就行
-          element.picture = "http://localhost:9090/" + data.imgUrl;
+          element.picture = data.data.img;
           //因为数组单值更新不会引起 Vue 重新渲染，手动通知 Vue 渲染
           self.$set(self.data3, index, element);
         }, "json");
@@ -233,22 +231,23 @@ export default {
     //当搜索框无内容且已经搜索过，那么就是清空了搜索框，这时重新加载初始数据
     if (this.search === "" && this.searchFlag) {
       //加载热门精品数据，服务端返回最多 12条 数据
-      $.get("http://localhost:8083/goods/getIndexGoods.do/1", function (data) {
+      $.get("http://localhost:8080/api/goods/", function (data) {
         //延迟 0.3 S 绑定数据
         self.fullscreenLoading = true;
         setTimeout(() => {
           self.fullscreenLoading = false;
         }, 300);
-        self.data1 = data;
+        self.data1 = data.data.goods;
         self.dataSearch = [];//重置搜索结果内容为空数组
         self.searchFlag = false;
         $(self.data1).each(function (index, element) {
           let jsonObj = {};
           jsonObj.goodsId = element.goodsId;
+          let requestUr3 = "http://localhost:8080/api/goods/"+element.uid+"/img";
           //为每个表格元素加载图片数据，主图
-          $.get("http://localhost:8083/goods/getGoodsMainImg.do", jsonObj, function (data) {
+          $.get(requestUr3, jsonObj, function (data) {
             //本地映射到9090端口，部署到远程服务器需要修改这里，服务端返回的imgUrl应该为相对路径，这里图片名字就行
-            element.picture = "http://localhost:9090/" + data.imgUrl;
+            element.picture = data.data.img;
             //因为数组单值更新不会引起 Vue 重新渲染，手动通知 Vue 渲染
             self.$set(self.data1, index, element);
           }, "json");
@@ -286,8 +285,8 @@ export default {
       jsonObj.goodsId = this.goodsInfoId;
       let jsonMsg = JSON.stringify(jsonObj);
       let self = this;
-      $.post("http://localhost:8083/shopCar/addOneToShopCar.do", jsonMsg, function (data) {
-        if (data.code === 1) {
+      $.post("http://localhost:8080/api/carts/"+jsonObj.userId+"/"+jsonObj.goodsId, jsonMsg, function (data) {
+        if (data.code === 200) {
           self.dialogValue = "加入购物车成功";
           self.goToShopCar = false;
         } else {
@@ -338,17 +337,18 @@ export default {
         }, 300);
 
         let jsonObj = {};
-        jsonObj.text = this.search;
-        $.get("http://localhost:8083/goods/getSearchGoods.do", jsonObj, function (data) {
+        jsonObj.title = this.search;
+        $.get("http://localhost:8080/api/goods", jsonObj, function (data) {
           //保存搜索内容
-          self.dataSearch = data;
+          self.dataSearch = data.data.goods;
           $(self.dataSearch).each(function (index, element) {
             let jsonObj = {};
             jsonObj.goodsId = element.goodsId;
+            let requesturl3 = "http://localhost:8080/api/goods"+element.uid+"/img"
             //为每个表格元素加载图片数据，主图
-            $.get("http://localhost:8083/goods/getGoodsMainImg.do", jsonObj, function (data) {
+            $.get(requesturl3, jsonObj, function (data) {
               //本地映射到9090端口，部署到远程服务器需要修改这里，服务端返回的imgUrl应该为相对路径，这里图片名字就行
-              element.picture = "http://localhost:9090/" + data.imgUrl;
+              element.picture = data.data.img
               //因为数组单值更新不会引起 Vue 重新渲染，手动通知 Vue 渲染
               self.$set(self.dataSearch, index, element);
             }, "json");

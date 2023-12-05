@@ -152,19 +152,26 @@
       };
       return {
         submitGoodsForm: {
-          name: "",
+          // name: "",
+          // price: "",
+          // goodsLevel: "",
+          // dscrip: "",
+          // userId: "",
+          // goodsId:"",
+          seller_id: "",
+          state: "",
+          game: "",
+          title: "",
+          detail: "",
           price: "",
-          goodsLevel: "",
-          dscrip: "",
-          userId: "",
-          goodsId:"",
+          publish_time: "",
         },
         dialogImageUrl: '',
         dialogVisible: false,
         disabled: false,
         dialogValue: '',
         centerDialogVisible: false,
-        submitFlag:false,
+        submitFlag:true,
         action:"",
         rules: {
           name: [
@@ -191,7 +198,7 @@
       $.get("http://localhost:8083/goods/getRandomGoodsId.do",function (data) {
         self.submitGoodsForm.goodsId = data.goodsId;
         //设置上传图片路径，需要一个商品ID
-        self.action = "http://localhost:8083/upload/uploadFile.do?goodsId=" + data.goodsId;
+        // self.action = "http://localhost:8083/upload/uploadFile.do?goodsId=" + data.goodsId;
       },"json");
     },
     methods: {
@@ -204,7 +211,7 @@
               this.submitGoodsForm.userId = window.sessionStorage.getItem("userId");
               let jsonMsg = JSON.stringify(this.submitGoodsForm);
 
-              $.post("http://localhost:8083/goods/createGoods.do", jsonMsg, function (data) {
+              $.post("http://localhost:8080/api/goods/", jsonMsg, function (data) {
                 if (data.code === 1) {
                   self.dialogValue = "保存成功";
                 } else {
@@ -217,7 +224,7 @@
               return false;
             }
           });
-          this.submitFlag = false;
+          this.submitFlag = true;
         }else{
           this.dialogValue = "请先上传商品图";
           this.centerDialogVisible = true;
